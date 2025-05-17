@@ -13,10 +13,17 @@ A SaaS application that allows users to process images using a credit-based syst
 
 ## Prerequisites
 
+### System Requirements
 - Docker and Docker Compose
-- PostgreSQL (if running locally)
-- Redis (if running locally)
+- Node.js (v16 or higher)
+- Python (v3.8 or higher)
+- PostgreSQL (v13 or higher, if running locally)
+- Redis (v6 or higher, if running locally)
+- Git
+
+### Accounts Required
 - Razorpay account for payment processing
+- (Optional) Cloud storage account for production deployment
 
 ## Setup
 
@@ -40,7 +47,23 @@ cp frontend/.env.example frontend/.env
 - Add Razorpay API keys
 - Generate a secure SECRET_KEY
 
-4. Build and start the containers:
+4. Database Setup:
+```bash
+# Create PostgreSQL database
+createdb credit_saas_db
+
+# Run database migrations
+cd backend
+alembic upgrade head
+```
+
+5. Redis Setup:
+```bash
+# If running Redis locally
+redis-server --requirepass your-redis-password
+```
+
+6. Build and start the containers:
 ```bash
 docker-compose up --build
 ```
@@ -85,24 +108,12 @@ npm install
 npm run dev
 ```
 
-## API Documentation
+## Environment Variables
 
-The API documentation is available at `/docs` when running the backend server. It provides detailed information about all available endpoints, request/response schemas, and authentication requirements.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
+### Backend (.env)
+```
 # App Configuration
-SECRET_KEY=your-secret-key-here  # Generate a secure random key
+SECRET_KEY=your-secure-random-key  # Generate using: openssl rand -hex 32
 API_V1_STR=/api/v1
 PROJECT_NAME=Credit-Based Image Processing SaaS
 VERSION=1.0.0
@@ -131,4 +142,50 @@ UPLOAD_DIR=uploads
 PROCESSED_DIR=processed
 
 # Credits Configuration
-CREDITS_PER_TASK=1 
+CREDITS_PER_TASK=1
+```
+
+### Frontend (.env)
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Database Connection Issues**
+   - Ensure PostgreSQL is running
+   - Verify database credentials in .env file
+   - Check if database exists: `createdb credit_saas_db`
+
+2. **Redis Connection Issues**
+   - Ensure Redis server is running
+   - Verify Redis password in .env file
+   - Check Redis connection: `redis-cli ping`
+
+3. **Celery Worker Issues**
+   - Ensure Redis is running
+   - Check Celery worker logs
+   - Verify broker URL in .env file
+
+4. **Frontend Build Issues**
+   - Clear node_modules: `rm -rf node_modules`
+   - Clear npm cache: `npm cache clean --force`
+   - Reinstall dependencies: `npm install`
+
+## API Documentation
+
+The API documentation is available at `/docs` when running the backend server. It provides detailed information about all available endpoints, request/response schemas, and authentication requirements.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 
